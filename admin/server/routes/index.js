@@ -8,7 +8,7 @@ module.exports = function IndexRoute (req, res) {
 	var keystone = req.keystone;
 	var lists = {};
 	_.forEach(keystone.lists, function (list, key) {
-		lists[key] = list.getOptions();
+		lists[key] = list.getOptions(req.user);
 	});
 
 	var UserList = keystone.list(keystone.get('user model'));
@@ -38,6 +38,7 @@ module.exports = function IndexRoute (req, res) {
 		user: {
 			id: req.user.id,
 			name: UserList.getDocumentName(req.user) || '(no name)',
+			isSuperAdmin: req.user.isSuperAdmin,
 		},
 		userList: UserList.key,
 		version: keystone.version,

@@ -10,8 +10,9 @@ module.exports = function (req, res) {
 		console.log('Refusing to reorder ' + req.list.key + ' ' + req.params.id + '; CSRF failure');
 		return res.apiError(403, 'invalid csrf');
 	}
+	var ownFilter = (req.ownershipFilter) ? req.ownershipFilter : {};
 	req.list.model.reorderItems(req.params.id, req.params.sortOrder, req.params.newOrder, function (err) {
 		if (err) return res.apiError('database error', err);
 		return getList(req, res);
-	});
+	}, ownFilter);
 };

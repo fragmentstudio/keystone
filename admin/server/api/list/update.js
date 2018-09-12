@@ -9,9 +9,15 @@ module.exports = function (req, res) {
 	if (!keystone.security.csrf.validate(req)) {
 		return res.apiError(403, 'invalid csrf');
 	}
+	// Userは除外
+	if (req.list.key == keystone.get('user model')) {
+		return res.apiError(403, 'this operation is not allowed on user model');
+	}
+	var ownFilter = (req.ownershipFilter) ? req.ownershipFilter : {};
 	// var updateCount = 0;
 	async.map(req.body.items, function (data, done) {
-		req.list.model.findById(data.id, function (err, item) {
+		// Ownershipで絞り込み
+		req.list.model.findOne(ownFilter).where('_id', data.id).exec(function (err, item) {
 			if (err) return done({ statusCode: 500, error: 'database error', detail: err, id: data.id });
 			if (!item) return done({ statusCode: 404, error: 'not found', id: data.id });
 			req.list.updateItem(item, data, { files: req.files, user: req.user }, function (err) {

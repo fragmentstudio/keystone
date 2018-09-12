@@ -94,6 +94,12 @@ function Field (list, path, options) {
 		},
 	});
 
+	// ユーザロール毎のオプション
+	this._permission = undefined;
+	if (options.fieldPermissions && _.isObject(options.fieldPermissions)) {
+		this._permission = options.fieldPermissions;
+	}
+
 }
 
 /**
@@ -356,4 +362,21 @@ Field.prototype.updateItem = function (item, data, callback) {
  */
 Field.prototype.getValueFromData = function (data, subpath) {
 	return this._path.get(data, subpath);
+};
+
+
+/**
+ * user.roleに合わせてReactに返すオプションを変更する
+ * @param {*}} user 
+ */
+Field.prototype.getUserOptions = function (user) {
+	var options = this.getOptions();
+	if (!this._permission) return options;
+	if (user && _.isObject(this._permission[user.role])) {
+		var overrideOptions = this._permission[user.role];
+		_.forIn(overrideOptions, function(value, key){
+			options[key] = value;
+		});
+	}
+	return options
 };
